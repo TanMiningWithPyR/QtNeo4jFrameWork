@@ -158,7 +158,7 @@ class ObjectWidget(QWidget):
         
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    node_label_name = {'label_id':'cls_aaa','lable_name':'People'}
+    node_label_name = {'label_id':'cls_aaa','label_name':'People'}
     node_structure = {
             'attr_aaa':{'field_name':'Sex',
                                   'field_widget_type':'QLineEdit',
