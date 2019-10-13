@@ -3,6 +3,10 @@
 Created on Sat Oct  5 11:12:59 2019
 
 @author: Fuyou Tan
+
+The file only does two things:
+    1. receives json strings from the clients and converts them into object format.
+    2. converts object format into json strings and send them to client.
 """
 
 from flask import Flask, request, jsonify

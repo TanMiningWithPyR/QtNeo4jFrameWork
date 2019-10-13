@@ -3,6 +3,8 @@
 Created on Sat Oct  5 11:19:28 2019
 
 @author: Fuyou Tan
+
+The aim to the file is to render the methods with http requests.
 """
 
 from datetime import datetime

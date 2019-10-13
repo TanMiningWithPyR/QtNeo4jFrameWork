@@ -9,7 +9,8 @@ from datetime import datetime
 from PyQt5.QtCore import QDate, QDateTime, QTime
 from PyQt5.QtWidgets import QApplication, QWidget, QStackedWidget, QLabel, QLineEdit, QDateEdit,\
                             QComboBox, QTextEdit, QListWidget, QGridLayout, QHBoxLayout, QVBoxLayout,\
-                            QSpinBox, QDoubleSpinBox, QGroupBox, QRadioButton, QCheckBox, QTimeEdit, QDateTimeEdit
+                            QSpinBox, QDoubleSpinBox, QGroupBox, QRadioButton, QCheckBox, QTimeEdit, QDateTimeEdit,\
+                            QPushButton
                            
 class FieldEditWidget(QWidget):
     field_name = ''
@@ -103,63 +104,81 @@ class FieldEditWidget(QWidget):
         elif self.field_widget_type == 'QLineEdit':
             self.field_edit.setText(value)          
         else:
-            self.field_edit.setValue(value)
-
-# This ObjectWidget widget is to show a class((objects instance from the class, nodes in Neo4j), 
-# The widget is divide into two parts, the left part is a list of nodes, the right is the detail for one node            
+            self.field_edit.setValue(value)      
+        
+# This ObjectWidget widget is to show a class((objects instance from the class, objects in Neo4j), 
+# The widget is divide into two parts, the left part is a list of objects, the right is the detail for one object            
 
 class ObjectWidget(QWidget):
-    node_label_name = dict()
-    node_structure = dict()
-    nodes = dict()
+    class_name = dict()
+    class_structure = dict()
+    objects = dict()
     detail_widgets = dict()
     
-    def __init__(self, node_label_name, node_structure, nodes): 
-        self.node_label_name = node_label_name
-        self.node_structure = node_structure
-        self.nodes = nodes        
+    def __init__(self, class_name, class_structure, objects): 
+        self.class_name = class_name
+        self.class_structure = class_structure
+        self.objects = objects        
         super(ObjectWidget, self).__init__()
-        # left part
+        # left part -- object list
         self.list_widget = QListWidget(self)
         self.__list_widget_init()
-        # right part
+        # right part -- field list
         self.detail_widget = QWidget()
         self.__detail_widget_init()
-        # Layout
-        self.h_layout = QHBoxLayout()
-        self.h_layout.addWidget(self.list_widget)
-        self.h_layout.addWidget(self.detail_widget)
-        self.setLayout(self.h_layout)
+        # tool bar part
+        self.search_combobox = QComboBox()
+        self.create_button = QPushButton('Create', self)
+        self.update_button = QPushButton('Update', self)
+        self.delete_button = QPushButton('Delete', self)
+        
+        # Horizontal Layout of Object
+        self.h_layout_obj = QHBoxLayout()
+        self.h_layout_obj.addWidget(self.list_widget)
+        self.h_layout_obj.addWidget(self.detail_widget)
+        #self.setLayout(self.h_layout_obj)
+        # Horizontal layout of Tool bar(CRUD)
+        self.h_layout_tool = QHBoxLayout()
+        self.h_layout_tool.addWidget(self.search_combobox)
+        self.h_layout_tool.addWidget(self.create_button)
+        self.h_layout_tool.addWidget(self.update_button)
+        self.h_layout_tool.addWidget(self.delete_button)
+        #self.setLayout(self.h_layout_tool)
+        # Vertial Layout
+        self.v_layout = QVBoxLayout()
+        self.v_layout.addLayout(self.h_layout_obj)
+        self.v_layout.addLayout(self.h_layout_tool)
+        self.setLayout(self.v_layout)
         
     def __list_widget_init(self):
-        for node in self.nodes:            
-            self.list_widget.addItem(node)
+        for object in self.objects:            
+            self.list_widget.addItem(object)
 
         self.list_widget.clicked.connect(self.change_func)    
         
     def __detail_widget_init(self):    
         detail_layout = QVBoxLayout()
-        for field_id in self.node_structure:
-            self.detail_widgets[field_id] = FieldEditWidget(self.node_structure[field_id]['field_name'], 
-                          self.node_structure[field_id]['field_widget_type'], 
-                          self.node_structure[field_id]['field_widget_context'])
+        for field_id in self.class_structure:
+            self.detail_widgets[field_id] = FieldEditWidget(self.class_structure[field_id]['field_name'], 
+                          self.class_structure[field_id]['field_widget_type'], 
+                          self.class_structure[field_id]['field_widget_context'])
             detail_layout.addWidget(self.detail_widgets[field_id])
             
         self.detail_widget.setLayout(detail_layout)
 
-    def set_node(self, node_name):
-        node = self.nodes[node_name]
-        for field_id in self.node_structure:
-            self.detail_widgets[field_id].set_value(node[field_id])
+    def set_object(self, object_name):
+        object = self.objects[object_name]
+        for field_id in self.class_structure:
+            self.detail_widgets[field_id].set_value(object[field_id])
         
     def change_func(self):
-        select_node = self.list_widget.currentItem()
-        self.set_node(select_node.text())
+        select_object = self.list_widget.currentItem()
+        self.set_object(select_object.text())
         
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    node_label_name = {'label_id':'cls_aaa','label_name':'People'}
-    node_structure = {
+    class_name = {'label_id':'cls_aaa','label_name':'People'}
+    class_structure = {
             'attr_aaa':{'field_name':'Sex',
                                   'field_widget_type':'QLineEdit',
                                   'field_widget_context':{'default':'Boy'}},
@@ -167,10 +186,10 @@ if __name__ == '__main__':
                         'field_widget_type':'QDateEdit',
                         'field_widget_context':{}}
     }
-    nodes = {'Mary':{'attr_aaa':'Girl','attr_aab': QDate(datetime.strptime('2019-01-10',"%Y-%m-%d"))},
+    objects = {'Mary':{'attr_aaa':'Girl','attr_aab': QDate(datetime.strptime('2019-01-10',"%Y-%m-%d"))},
              'Joe':{'attr_aaa':'Boy','attr_aab':QDate(datetime.strptime('2019-02-10',"%Y-%m-%d"))}            
             }
-    demo = ObjectWidget(node_label_name,node_structure,nodes)
+    demo = ObjectWidget(class_name,class_structure,objects)
     demo.show()
     
 #    demo = FieldEditWidget('aaa','QComboBox',{'value_list':['a','b','c','d','e']})
