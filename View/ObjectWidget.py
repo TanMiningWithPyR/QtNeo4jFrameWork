@@ -105,6 +105,33 @@ class FieldEditWidget(QWidget):
             self.field_edit.setText(value)          
         else:
             self.field_edit.setValue(value)      
+            
+class SearchWidget(QWidget):
+    search_dist = dict()
+    
+    def __init__(self, class_name, class_structure):
+        self.class_structure = class_structure
+        
+        super(SearchWidget, self).__init__()   
+        
+        self.field_select = QComboBox()   
+        for field_id in self.class_structure:
+            self.search_dist[field_id] = self.class_structure[field_id]['field_name']
+            self.field_select.addItem(self.search_dist[field_id])            
+        self.field_condition = QLineEdit()
+        
+        self.field_layout = QHBoxLayout()
+        self.field_layout.addWidget(self.field_select)
+        self.field_layout.addWidget(self.field_condition)
+        
+        self.setLayout(self.field_layout)    
+        
+        self.field_select.currentIndexChanged.connect(self.get_current_field_id)
+        
+    def get_current_field_id(self):
+        current_text = self.field_select.currentText()
+        print(list(self.search_dist.keys())[list(self.search_dist.values()).index(current_text)])  
+    
         
 # This ObjectWidget widget is to show a class((objects instance from the class, objects in Neo4j), 
 # The widget is divide into two parts, the left part is a list of objects, the right is the detail for one object            
@@ -127,7 +154,7 @@ class ObjectWidget(QWidget):
         self.detail_widget = QWidget()
         self.__detail_widget_init()
         # tool bar part
-        self.search_combobox = QComboBox()
+        self.search_combobox = SearchWidget(class_name, class_structure)
         self.create_button = QPushButton('Create', self)
         self.update_button = QPushButton('Update', self)
         self.delete_button = QPushButton('Delete', self)
@@ -154,7 +181,7 @@ class ObjectWidget(QWidget):
         for object in self.objects:            
             self.list_widget.addItem(object)
 
-        self.list_widget.clicked.connect(self.change_func)    
+        self.list_widget.clicked.connect(self.list_change_func)    
         
     def __detail_widget_init(self):    
         detail_layout = QVBoxLayout()
@@ -171,7 +198,7 @@ class ObjectWidget(QWidget):
         for field_id in self.class_structure:
             self.detail_widgets[field_id].set_value(object[field_id])
         
-    def change_func(self):
+    def list_change_func(self):
         select_object = self.list_widget.currentItem()
         self.set_object(select_object.text())
         
